@@ -12,7 +12,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 Base = declarative_base()
 _engine = create_engine('sqlite:///itemcatalog.db')
-Base.metadata.create_all(_engine)
+
 Base.metadata.bind = _engine
 _db_session = sessionmaker(bind=_engine)
 _session = _db_session()
@@ -23,8 +23,8 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
     email = Column(String(250), nullable=False)
-    items = relationship("Item", back_populates='user',
-                         cascade="all, delete, delete-orphan")
+    items = relationship('Item', back_populates='user',
+                         cascade='all, delete, delete-orphan')
 
     @classmethod
     def create_user(cls, session):
@@ -40,14 +40,19 @@ class User(Base):
 
     @classmethod
     def by_id(cls, user_id):
-        user = _session.query(User).filter_by(id=user_id).one()
-        return user
+        try:
+            user = _session.query(User).filter_by(id=user_id).one()
+            return user
+        except NoResultFound:
+            return None
 
     @classmethod
     def by_email(cls, email):
-        user = _session.query(User).filter_by(email=email).one()
-        return user
-
+        try:
+            user = _session.query(User).filter_by(email=email).one()
+            return user
+        except NoResultFound:
+            return None
     @property
     def serialize(self):
         """Return object data in easily serializeable format"""
@@ -66,41 +71,57 @@ class Item(Base):
     category = Column(String(250), nullable=False)
     description = Column(Text, nullable=False) 
     user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship("User", back_populates="items")
+    user = relationship('User', back_populates='items')
 
     @classmethod
     def by_id(cls, item_id):
-        item = _session.query(Item).filter_by(id=item_id).one()
-        return item
+        try:
+            item = _session.query(Item).filter_by(id=item_id).one()
+            return item
+        except NoResultFound:
+            return None
+
 
     @classmethod
     def by_name(cls, name):
-        item = _session.query(Item).filter_by(name=name).one()
-        return item
+        try:
+            item = _session.query(Item).filter_by(name=name).one()
+            return item
+        except NoResultFound:
+            return None
 
     @classmethod
     def by_category(cls, category):
-        items = (_session.query(Item)
-                    .filter_by(category=category)
-                    .order_by(Item.name)
-                    .all())
-        return items
+        try:
+            items = (_session.query(Item)
+                        .filter_by(category=category)
+                        .order_by(Item.name)
+                        .all())
+            return items
+        except NoResultFound:
+            return None
 
     @classmethod
     def by_user_id(cls, user_id):
-        items = (_session.query(Item)
-                    .filter_by(user_id=user_id)
-                    .order_by(Item.name)
-                    .all())
-        return items
+        try:
+            items = (_session.query(Item)
+                        .filter_by(user_id=user_id)
+                        .order_by(Item.name)
+                        .all())
+            return items
+        except NoResultFound:
+            return None
 
     @classmethod
     def get_categories(cls):
-        categories = (_session.query(Item)
-                        .group_by(Item.category)
-                        .order_by(Item.category)
-                        .all())
-        return [category for category in categories]
+        try:
+            categories = (_session.query(Item)
+                            .group_by(Item.category)
+                            .order_by(Item.category)
+                            .all())
+            return [category for category in categories]
+        except NoResultFound:
+            return None
 
     @classmethod
     def create_item(cls, name, description, category, user_id):
@@ -129,4 +150,4 @@ class Item(Base):
         }
 
 
-
+Base.metadata.create_all(_engine)

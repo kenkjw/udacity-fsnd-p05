@@ -1,20 +1,65 @@
 from flask import Blueprint
+from flask import flash
+from flask import make_response
+from flask import render_template
+from flask import session
+from flask import request
+from flask import redirect
+from flask import url_for
+import json
+from oauth2client import client
+from oauth2client import crypt
 
-users_bp = Blueprint('users', __name__)
+from models import User
+import utils
+import config
+
+Users_bp = Blueprint('users', __name__,template_folder='templates')
 
 
-@users_bp.route('/login')
+@Users_bp.route('/login')
 def login():
     """Log the user out."""
-    return 'login'
+    session['CSRF'] = utils.token()
+    return render_template('login.html',test='test')
 
 
-@users_bp.route('/token')
+@Users_bp.route('/token', methods=['POST'])
 def token():
-    return 'token'
+    token = request.form.get('token')
+    csrftoken = request.form.get('csrftoken')
+    provider = request.form.get('provider')
+
+    if csrftoken != session['CSRF']:
+        response = make_response(json.dumps('Invalid CSRF token.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+
+    try:
+        token_info = client.verify_id_token(token, config.oauth['google']['client_id'])
+        session['provider'] = 'google'
+        session['name'] = token_info['name']
+        session['email'] = token_info['email']
+        user = User.by_email(token_info['email']) or User.create_user(session)
+        session['user_id'] = user.id
+        response = make_response(json.dumps('You have logged in.'),
+                                     200)
+        response.headers['Content-Type'] = 'application/json'
+        return response        
+    except crypt.AppIdentityError:
+        response = make_response(json.dumps('Invalid token.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
 
 
-@users_bp.route('/logout')
+
+@Users_bp.route('/logout')
 def logout():
     """Log the user out."""
-    return 'logout'
+    if 'provider' in session:
+        del session['provider']
+        del session['user_id']
+        del session['name']
+        del session['email']
+    flash('You have successfully been logged out.')
+    return redirect('/')
