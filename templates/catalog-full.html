@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<ul>
+{% for category in categories %}
+<li><a href="{{ url_for('catalog.list_category',category_name=category) }}">{{ category }}</a></li>
+{% endfor %}
+</ul>
+<ul>
+{% for item in latest %}
+<li><a href="{{ url_for('catalog.show_item',category_name=item.category,item_name=item.name) }}">{{ item.name }}</a> (<a href="{{ url_for('catalog.list_category',category_name=item.category) }}">{{item.category}}</a>)</li>
+{% endfor %}
+</ul>
+{% endblock %}

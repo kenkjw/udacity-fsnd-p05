@@ -1,14 +1,17 @@
 from sqlalchemy import Column
+from sqlalchemy import DateTime
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import String
 from sqlalchemy import Text
 from sqlalchemy import create_engine
 from sqlalchemy import asc
+from sqlalchemy import desc
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
+import datetime
 
 Base = declarative_base()
 _engine = create_engine('sqlite:///itemcatalog.db')
@@ -72,6 +75,8 @@ class Item(Base):
     description = Column(Text, nullable=False) 
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship('User', back_populates='items')
+    created_date = Column(DateTime, default=datetime.datetime.utcnow)
+    modified_date = Column(DateTime, onupdate=datetime.datetime.now)
 
     @classmethod
     def by_id(cls, item_id):
@@ -83,9 +88,11 @@ class Item(Base):
 
 
     @classmethod
-    def by_name(cls, name):
+    def by_name(cls, category, name):
         try:
-            item = _session.query(Item).filter_by(name=name).one()
+            item = (_session.query(Item)
+                        .filter_by(category=category,name=name)
+                        .one())
             return item
         except NoResultFound:
             return None
@@ -115,13 +122,26 @@ class Item(Base):
     @classmethod
     def get_categories(cls):
         try:
-            categories = (_session.query(Item)
+            items = (_session.query(Item)
                             .group_by(Item.category)
                             .order_by(Item.category)
                             .all())
-            return [category for category in categories]
+            return [item.category for item in items]
         except NoResultFound:
             return None
+
+    @classmethod
+    def get_latest(cls, limit=10):
+        try:
+            items = (_session.query(Item)
+                            .order_by(Item.modified_date.desc())
+                            .limit(limit)
+                            .all())
+            return items
+        except NoResultFound:
+            return None
+
+    
 
     @classmethod
     def create_item(cls, name, description, category, user_id):
