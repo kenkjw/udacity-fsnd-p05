@@ -1,5 +1,6 @@
 from flask import Blueprint
 from flask import flash
+from flask import jsonify
 from flask import redirect
 from flask import render_template
 from flask import request
@@ -15,10 +16,17 @@ Catalog = Blueprint('catalog', __name__)
 
 @Catalog.route('/')
 @Catalog.route('/catalog')
-def full_catalog():
+@Catalog.route('/catalog.<type>')
+def full_catalog(type='html'):
     """Lists out categories and latest items."""
     categories = Item.get_categories()
     latest = Item.get_latest(10)
+    if type.lower() == 'json':
+        catalog = dict()
+        for category in categories:
+            category_items = Item.by_category(category)
+            catalog[category] = [i.serialize for i in category_items]
+        return jsonify(catalog=catalog)
     return render_template('catalog-full.html', categories=categories, latest=latest)
 
 
@@ -45,10 +53,14 @@ def create_item():
 
 
 @Catalog.route('/catalog/<category_name>')
-def list_category(category_name):
+@Catalog.route('/catalog/<category_name>.<type>')
+def list_category(category_name,type='html'):
     """Lists the items of a category."""
     categories = Item.get_categories()
     category_items = Item.by_category(category_name)
+
+    if type.lower() == 'json':
+        return jsonify(category_items=[i.serialize for i in category_items])
     return render_template(
         'catalog-category.html', 
         categories=categories, 
@@ -56,11 +68,14 @@ def list_category(category_name):
 
 
 @Catalog.route('/catalog/<category_name>/<item_name>')
-def show_item(category_name, item_name):
+@Catalog.route('/catalog/<category_name>/<item_name>.<type>')
+def show_item(category_name, item_name, type='html'):
     """Show description of item."""
     categories = Item.get_categories()
     item = Item.by_name(category_name, item_name)
     category_items = Item.by_category(category_name)
+    if type.lower() == 'json':
+        return jsonify(item=item.serialize)
     return render_template('catalog-item.html', item=item, categories=categories, category_items=category_items)
 
 
