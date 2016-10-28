@@ -1,10 +1,9 @@
-<ul>
-{% for category in categories %}
-<li><a href="{{ url_for('catalog.list_category',category_name=category) }}">{{ category }}</a></li>
-{% endfor %}
-</ul>
-<ul>
-{% for item in category_items %}
-<li><a href="{{ url_for('catalog.show_item',category_name=item.category,item_name=item.name) }}">{{ item.name }}</a></li>
-{% endfor %}
-</ul>
+{% extends "base.html" %}
+{% block content %}
+<section class="col-md-3">
+{% include "catalog-category-list.html" %}
+</section>
+<section class="col-md-3">
+{% include "catalog-category-item-list.html" %}
+</section>
+{% endblock %}

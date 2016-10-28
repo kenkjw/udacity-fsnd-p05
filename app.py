@@ -3,11 +3,16 @@ from flask import Flask
 from routes.catalog import Catalog
 from routes.users import Users_bp
 import config
+import utils
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 
 app.register_blueprint(Catalog)
 app.register_blueprint(Users_bp)
+
+
+
+app.jinja_env.globals.update(signed_in=utils.signed_in)
 
 from flask import session
 from flask import render_template

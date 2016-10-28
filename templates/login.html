@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
-<div id="g-btn" data-onsuccess="onSignIn">asdf</div>
+<div id="g-btn" data-onsuccess="onSignIn"></div>
 <div class="g-signin2" data-onsuccess="onSignIn" data-onload="false"></div>
 <script>
 function onSignIn(googleUser) {
     var id_token = googleUser.getAuthResponse().id_token;
-    qs = 'token=' + id_token + '&csrftoken={{ session.CSRF }}&provider=google'
+    qs = 'token=' + id_token + '&csrftoken={{ session.csrf }}&provider=google'
     $.ajax({
       type: 'POST',
       url: '/token',
       data: {
         'token': id_token,
-        'csrftoken': '{{session.CSRF}}',
+        'csrftoken': '{{session.csrf}}',
         'provider': 'google'
       },
       success: function(result) {
@@ -33,7 +33,4 @@ function onSignIn(googleUser) {
 <div id="result"></div>
 {% endblock %}
 {% block scripts %}
-<meta name="google-signin-client_id" content="973180597680-9k6ckf48l1iotcgcl9bhr2jen2tuuv54.apps.googleusercontent.com">
-<script src="https://apis.google.com/js/client:platform.js?onload=signout" async defer>
-    </script>
 {% endblock %}

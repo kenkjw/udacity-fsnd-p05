@@ -1,5 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>{{ items.name }}</h2>
-<p>{{ items.description }}</p>
+<section class="col-md-3">
+{% include "catalog-category-list.html" %}
+</section>
+<section class="col-md-3">
+{% include "catalog-category-item-list.html" %}
+</section>
+<section class="col-md-6">
+<h2>{{ item.name }}</h2>
+<p>{{ item.description }}</p>
+{% if signed_in() and item.is_owned_by(session['user_id']) %}
+<ul class="nav navbar-nav">
+<li><a href="{{ url_for('catalog.edit_item',category_name=item.category,item_name=item.name) }}">Edit</a></li>
+<li><a href="{{ url_for('catalog.delete_item',category_name=item.category,item_name=item.name) }}">Delete</a></li>
+</ul>
+{% endif %}
+</section>
 {% endblock %}

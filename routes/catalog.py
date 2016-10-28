@@ -1,11 +1,16 @@
 from flask import Blueprint
 from flask import flash
+from flask import redirect
 from flask import render_template
+from flask import request
 from flask import session
 from flask import url_for
 
 from models import Item
 from models import User
+from utils import token
+from utils import signed_in
+
 Catalog = Blueprint('catalog', __name__)
 
 @Catalog.route('/')
@@ -17,11 +22,26 @@ def full_catalog():
     return render_template('catalog-full.html', categories=categories, latest=latest)
 
 
-@Catalog.route('/catalog/add')
+@Catalog.route('/catalog/add', methods=['GET','POST'])
 def create_item():
     """Add an item."""
-
-    return render_template('catalog-add.html')
+    if request.method == 'POST':
+        name = request.form.get('name')
+        description = request.form.get('description')
+        category = request.form.get('category')
+        csrftoken = request.form.get('csrftoken')
+        if csrftoken != session['csrf']:
+            flash('Invalid CSRF token.')
+        elif not name or not description or not category:
+            flash('All fields must be filled.')
+        else:
+            item = Item.create_item(name, description, category, session['user_id'])
+            if item:
+                flash('Item successfully updated.')
+                return redirect(url_for('catalog.show_item',category_name=item.category,item_name=item.name))    
+    categories = Item.get_categories()
+    session['csrf'] = token()
+    return render_template('catalog-add.html',categories=categories)
 
 
 @Catalog.route('/catalog/<category_name>')
@@ -38,20 +58,77 @@ def list_category(category_name):
 @Catalog.route('/catalog/<category_name>/<item_name>')
 def show_item(category_name, item_name):
     """Show description of item."""
+    categories = Item.get_categories()
     item = Item.by_name(category_name, item_name)
-    return render_template('catalog-item.html', items=item)
+    category_items = Item.by_category(category_name)
+    return render_template('catalog-item.html', item=item, categories=categories, category_items=category_items)
 
 
-@Catalog.route('/catalog/<category_name>/<item_name>/edit')
+@Catalog.route('/catalog/<category_name>/<item_name>/edit', methods=['GET','POST'])
 def edit_item(category_name, item_name):
     """Edit an item."""
     item = Item.by_name(category_name, item_name)
-    return render_template('catalog-item-edit.html', item=item)
+    if not item:
+        flash('Could not find item.')
+        return redirect('/')
+
+    if not signed_in():
+        flash('You must be logged in to edit an item.')
+        return redirect(url_for('catalog.show_item',category_name=item.category,item_name=item.name))
+    
+    if not item.is_owned_by(session['user_id']):
+        flash('You do not have permission to edit this item.')
+        return redirect(url_for('catalog.show_item',category_name=item.category,item_name=item.name))
+    
+    if request.method == 'POST':
+        name = request.form.get('name')
+        description = request.form.get('description')
+        category = request.form.get('category')
+        csrftoken = request.form.get('csrftoken')
+        if csrftoken != session['csrf']:
+            flash('Invalid CSRF token.')
+        elif not name or not description or not category:
+            flash('All fields must be filled.')
+        else:
+            item.name = name
+            item.description = description
+            item.category = category
+            flash('Item successfully updated.')
+            return redirect(url_for('catalog.show_item',category_name=item.category,item_name=item.name))
+
+    categories = Item.get_categories()
+    category_items = Item.by_category(category_name)
+    session['csrf'] = token()
+    return render_template('catalog-item-edit.html', item=item, categories=categories, category_items=category_items)
 
 
-@Catalog.route('/catalog/<category_name>/<item_name>/delete')
+@Catalog.route('/catalog/<category_name>/<item_name>/delete', methods=['GET','POST'])
 def delete_item(category_name, item_name):
     """Delete an item."""
     item = Item.by_name(category_name, item_name)
-    return render_template('catalog-item-delete.html', item=item)
+    if not item:
+        flash('Could not find item.')
+        return redirect('/')
+
+    if not signed_in():
+        flash('You must be logged in to delete an item.')
+        return redirect(url_for('catalog.show_item',category_name=item.category,item_name=item.name))
+    
+    if not item.is_owned_by(session['user_id']):
+        flash('You do not have permission to delete this item.')
+        return redirect(url_for('catalog.show_item',category_name=item.category,item_name=item.name))
+    
+    if request.method == 'POST':
+        csrftoken = request.form.get('csrftoken')
+        if csrftoken != session['csrf']:
+            flash('Invalid CSRF token.')
+        else:
+            item.delete()
+            flash('Item successfully deleted.')
+            return redirect('/')
+
+    categories = Item.get_categories()
+    category_items = Item.by_category(category_name)
+    session['csrf'] = token()
+    return render_template('catalog-item-delete.html', item=item, categories=categories, category_items=category_items)
 

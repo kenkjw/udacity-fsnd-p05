@@ -146,13 +146,13 @@ class Item(Base):
     @classmethod
     def create_item(cls, name, description, category, user_id):
         new_item = Item(name=name, description=description,
-                        category=category, user_id=user_id)
+                        category=category.lower(), user_id=user_id)
         _session.add(new_item)
         _session.commit()
 
         return new_item
 
-    def is_owner(self, user_id):
+    def is_owned_by(self, user_id):
         return self.user_id == user_id
 
     def delete(self):

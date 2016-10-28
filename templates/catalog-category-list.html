@@ -1,0 +1,6 @@
+<h2>Categories</h2>
+<ul class="text-capitalize list-unstyled"">
+{% for category in categories %}
+<li><a href="{{ url_for('catalog.list_category',category_name=category) }}">{{ category }}</a></li>
+{% endfor %}
+</ul>

@@ -11,7 +11,7 @@ from oauth2client import client
 from oauth2client import crypt
 
 from models import User
-import utils
+from utils import token
 import config
 
 Users_bp = Blueprint('users', __name__,template_folder='templates')
@@ -20,7 +20,7 @@ Users_bp = Blueprint('users', __name__,template_folder='templates')
 @Users_bp.route('/login')
 def login():
     """Log the user out."""
-    session['CSRF'] = utils.token()
+    session['csrf'] = token()
     return render_template('login.html',test='test')
 
 
@@ -30,7 +30,7 @@ def token():
     csrftoken = request.form.get('csrftoken')
     provider = request.form.get('provider')
 
-    if csrftoken != session['CSRF']:
+    if csrftoken != session['csrf']:
         response = make_response(json.dumps('Invalid CSRF token.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response

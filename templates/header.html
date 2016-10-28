@@ -1,3 +1,24 @@
-<div class="col-md-12">
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/">Item Catalog</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li><a href="/">Latest</a></li>
+      {% if signed_in() %}
+      <li><a href="{{ url_for('catalog.create_item') }}">Add an Item</a></li>
+      {% endif %}
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+    {% if signed_in() %}
+        <li><a href="{{ url_for('users.logout') }}" class=".logout"><span class="glyphicon glyphicon-log-out"> Logout</span></a></li>
+    {% else %}
+        <li><a href="{{ url_for('users.login') }}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+    {% endif %}
+    </ul>
+    {% if signed_in() %}
+        <p class="navbar-text navbar-right">Welcome, {{ session['name'] }}!</p>
+    {% endif %}
     
-</div>
+  </div>
+</nav>
