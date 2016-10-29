@@ -6,31 +6,31 @@
 <div class="g-signin2" data-onsuccess="onSignIn" data-onload="false"></div>
 <script>
 function onSignIn(googleUser) {
-    var id_token = googleUser.getAuthResponse().id_token;
-    qs = 'token=' + id_token + '&csrftoken={{ session.csrf }}&provider=google';
-    $.ajax({
-      type: 'POST',
-      url: '/token',
-      data: {
-        'token': id_token,
-        'csrftoken': '{{session.csrf}}',
-        'provider': 'google'
+var id_token = googleUser.getAuthResponse().id_token;
+qs = 'token=' + id_token + '&csrftoken={{ session.csrf }}&provider=google';
+$.ajax({
+  type: 'POST',
+  url: '/token',
+  data: {
+    'token': id_token,
+    'csrftoken': '{{session.csrf}}',
+    'provider': 'google'
+  },
+  statusCode: {
+    200: function() {
+      $('#result').html('Logged in using Google credentials! Redirecting. . .')
+        setTimeout(function() {
+            window.location.href = "/";
+        }, 3000);
       },
-      statusCode: {
-        200: function() {
-          $('#result').html('Logged in using Google credentials! Redirecting. . .')
-            setTimeout(function() {
-                {#window.location.href = "/";#}
-            }, 3000);
-          },
-        401: function() {
-          $('#result').html('Failed to login.');
-            signOut();
-        }
+    401: function() {
+      $('#result').html('Failed to login.');
+        signOut();
+    }
 
-      }
-    });
   }
+    });
+}
 </script>
 <div id="result"></div>
 </section>
