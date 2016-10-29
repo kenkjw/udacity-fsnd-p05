@@ -1,12 +1,7 @@
 {
     "oauth":{
             "google":{
-                "auth_uri":"https://accounts.google.com/o/oauth2/auth",
-                "token_uri":"https://accounts.google.com/o/oauth2/token",
-                "client_id":"973180597680-9k6ckf48l1iotcgcl9bhr2jen2tuuv54.apps.googleusercontent.com",
-                "client_secret":"tKaGOW6UXySpWT1lzB_q-Nfl"}
+                "client_id":"973180597680-9k6ckf48l1iotcgcl9bhr2jen2tuuv54.apps.googleusercontent.com"
         },
     "secret_key":"souper__random_sekret_kee_that_nowan_will_guess"
-
-
 }

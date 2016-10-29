@@ -21,6 +21,13 @@ _db_session = sessionmaker(bind=_engine)
 _session = _db_session()
 
 class User(Base):
+    """
+    Model class representing a user of the catalog.
+
+    Attributes:
+        name:   string representing the user's name
+        email:  string representing the user's email
+    """
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
@@ -67,6 +74,18 @@ class User(Base):
 
 
 class Item(Base):
+    """
+    Model class representing an item in the catalog.
+    
+    Attributes:
+        name:  string representing the item's name
+        email:  string representing the item's category
+        description:  text representing the item's description
+        user_id:  id of the user model that created the item
+        created_date:  date the item was created
+        modified_date:  date the item was last modified
+
+    """
     __tablename__ = 'item'
 
     id = Column(Integer, primary_key=True)

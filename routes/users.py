@@ -26,6 +26,11 @@ def login():
 
 @Users_bp.route('/token', methods=['POST'])
 def verify_token():
+    """Verifies the identify of the user through their oauth token
+
+    Returns a 200 HTTP response if the token is valid
+    Returns a 401 HTTP response on error.
+    """
     token = request.form.get('token')
     csrftoken = request.form.get('csrftoken')
     provider = request.form.get('provider')
@@ -38,6 +43,9 @@ def verify_token():
     try:
         token_info = client.verify_id_token(
             token, config.oauth['google']['client_id'])
+        if token_info['iss'] not in ['accounts.google.com', 
+                                    'https://accounts.google.com']:
+            raise crypt.AppIdentityError("Wrong issuer.")
         session['provider'] = 'google'
         session['name'] = token_info['name']
         session['email'] = token_info['email']
@@ -57,7 +65,7 @@ def verify_token():
 @Users_bp.route('/logout')
 def logout():
     """Log the user out."""
-    if 'provider' in session:
+    if 'user_id' in session:
         del session['provider']
         del session['user_id']
         del session['name']

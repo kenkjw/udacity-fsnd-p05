@@ -2,9 +2,6 @@ $(document).ready(function() {
     $('.logout').click(function(){
         signOut();
     });
-
-
-
 });
 
 function signOut() {

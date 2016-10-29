@@ -7,18 +7,12 @@ import utils
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 
+# Register blueprints
 app.register_blueprint(Catalog)
 app.register_blueprint(Users_bp)
 
-
-
+# Load methods to use in jinja templates
 app.jinja_env.globals.update(signed_in=utils.signed_in)
-
-from flask import session
-from flask import render_template
-@app.route('/debug')
-def test():
-    return render_template('debug.html')
 
 if __name__ == '__main__':
     app.secret_key = config.secret_key
