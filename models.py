@@ -20,6 +20,7 @@ Base.metadata.bind = _engine
 _db_session = sessionmaker(bind=_engine)
 _session = _db_session()
 
+
 class User(Base):
     """
     Model class representing a user of the catalog.
@@ -47,7 +48,6 @@ class User(Base):
             _session.commit()
             return new_user
 
-
     @classmethod
     def by_id(cls, user_id):
         try:
@@ -63,6 +63,7 @@ class User(Base):
             return user
         except NoResultFound:
             return None
+
     @property
     def serialize(self):
         """Return object data in easily serializeable format"""
@@ -76,7 +77,7 @@ class User(Base):
 class Item(Base):
     """
     Model class representing an item in the catalog.
-    
+
     Attributes:
         name:  string representing the item's name
         email:  string representing the item's category
@@ -91,7 +92,7 @@ class Item(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
     category = Column(String(250), nullable=False)
-    description = Column(Text, nullable=False) 
+    description = Column(Text, nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship('User', back_populates='items')
     created_date = Column(DateTime, default=datetime.datetime.utcnow)
@@ -105,13 +106,12 @@ class Item(Base):
         except NoResultFound:
             return None
 
-
     @classmethod
     def by_name(cls, category, name):
         try:
             item = (_session.query(Item)
-                        .filter_by(category=category,name=name)
-                        .one())
+                    .filter_by(category=category, name=name)
+                    .one())
             return item
         except NoResultFound:
             return None
@@ -120,9 +120,9 @@ class Item(Base):
     def by_category(cls, category):
         try:
             items = (_session.query(Item)
-                        .filter_by(category=category)
-                        .order_by(Item.name)
-                        .all())
+                     .filter_by(category=category)
+                     .order_by(Item.name)
+                     .all())
             return items
         except NoResultFound:
             return None
@@ -131,9 +131,9 @@ class Item(Base):
     def by_user_id(cls, user_id):
         try:
             items = (_session.query(Item)
-                        .filter_by(user_id=user_id)
-                        .order_by(Item.name)
-                        .all())
+                     .filter_by(user_id=user_id)
+                     .order_by(Item.name)
+                     .all())
             return items
         except NoResultFound:
             return None
@@ -142,9 +142,9 @@ class Item(Base):
     def get_categories(cls):
         try:
             items = (_session.query(Item)
-                            .group_by(Item.category)
-                            .order_by(Item.category)
-                            .all())
+                     .group_by(Item.category)
+                     .order_by(Item.category)
+                     .all())
             return [item.category for item in items]
         except NoResultFound:
             return None
@@ -153,14 +153,12 @@ class Item(Base):
     def get_latest(cls, limit=10):
         try:
             items = (_session.query(Item)
-                            .order_by(Item.modified_date.desc())
-                            .limit(limit)
-                            .all())
+                     .order_by(Item.modified_date.desc())
+                     .limit(limit)
+                     .all())
             return items
         except NoResultFound:
             return None
-
-    
 
     @classmethod
     def create_item(cls, name, description, category, user_id):

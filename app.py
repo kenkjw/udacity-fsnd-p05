@@ -17,4 +17,4 @@ app.jinja_env.globals.update(signed_in=utils.signed_in)
 if __name__ == '__main__':
     app.secret_key = config.secret_key
     app.debug = True
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=8005)

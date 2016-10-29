@@ -14,7 +14,7 @@ from models import User
 from utils import token
 import config
 
-Users_bp = Blueprint('users', __name__,template_folder='templates')
+Users_bp = Blueprint('users', __name__, template_folder='templates')
 
 
 @Users_bp.route('/login')
@@ -43,8 +43,8 @@ def verify_token():
     try:
         token_info = client.verify_id_token(
             token, config.oauth['google']['client_id'])
-        if token_info['iss'] not in ['accounts.google.com', 
-                                    'https://accounts.google.com']:
+        if token_info['iss'] not in ['accounts.google.com',
+                                     'https://accounts.google.com']:
             raise crypt.AppIdentityError("Wrong issuer.")
         session['provider'] = 'google'
         session['name'] = token_info['name']
@@ -52,14 +52,13 @@ def verify_token():
         user = User.by_email(token_info['email']) or User.create_user(session)
         session['user_id'] = user.id
         response = make_response(json.dumps('You have logged in.'),
-                                     200)
+                                 200)
         response.headers['Content-Type'] = 'application/json'
-        return response        
+        return response
     except crypt.AppIdentityError:
         response = make_response(json.dumps('Invalid token.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-
 
 
 @Users_bp.route('/logout')
