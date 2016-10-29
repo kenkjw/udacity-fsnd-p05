@@ -5,6 +5,3 @@ with open('config.json','r') as f:
 
 oauth = _config['oauth']
 secret_key = _config['secret_key']
-
-        
-

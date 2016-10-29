@@ -2,6 +2,7 @@
     "oauth":{
             "google":{
                 "client_id":"973180597680-9k6ckf48l1iotcgcl9bhr2jen2tuuv54.apps.googleusercontent.com"
+            }
         },
     "secret_key":"souper__random_sekret_kee_that_nowan_will_guess"
 }
