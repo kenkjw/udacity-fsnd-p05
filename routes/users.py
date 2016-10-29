@@ -21,11 +21,11 @@ Users_bp = Blueprint('users', __name__,template_folder='templates')
 def login():
     """Log the user out."""
     session['csrf'] = token()
-    return render_template('login.html',test='test')
+    return render_template('login.html')
 
 
 @Users_bp.route('/token', methods=['POST'])
-def token():
+def verify_token():
     token = request.form.get('token')
     csrftoken = request.form.get('csrftoken')
     provider = request.form.get('provider')
@@ -34,7 +34,7 @@ def token():
         response = make_response(json.dumps('Invalid CSRF token.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-
+    session['csrf'] = ''
     try:
         token_info = client.verify_id_token(token, config.oauth['google']['client_id'])
         session['provider'] = 'google'

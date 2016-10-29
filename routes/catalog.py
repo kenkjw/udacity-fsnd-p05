@@ -43,6 +43,7 @@ def create_item():
         elif not name or not description or not category:
             flash('All fields must be filled.')
         else:
+            session['csrf'] = ''
             item = Item.create_item(name, description, category, session['user_id'])
             if item:
                 flash('Item successfully updated.')
@@ -105,6 +106,7 @@ def edit_item(category_name, item_name):
         elif not name or not description or not category:
             flash('All fields must be filled.')
         else:
+            session['csrf'] = ''
             item.name = name
             item.description = description
             item.category = category
@@ -138,6 +140,7 @@ def delete_item(category_name, item_name):
         if csrftoken != session['csrf']:
             flash('Invalid CSRF token.')
         else:
+            session['csrf'] = ''
             item.delete()
             flash('Item successfully deleted.')
             return redirect('/')

@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
+<section class="col-md-12">
+<h3>Login with one of the following providers:</h3>
 <div id="g-btn" data-onsuccess="onSignIn"></div>
 <div class="g-signin2" data-onsuccess="onSignIn" data-onload="false"></div>
 <script>
 function onSignIn(googleUser) {
     var id_token = googleUser.getAuthResponse().id_token;
-    qs = 'token=' + id_token + '&csrftoken={{ session.csrf }}&provider=google'
+    qs = 'token=' + id_token + '&csrftoken={{ session.csrf }}&provider=google';
     $.ajax({
       type: 'POST',
       url: '/token',
@@ -14,23 +16,24 @@ function onSignIn(googleUser) {
         'csrftoken': '{{session.csrf}}',
         'provider': 'google'
       },
-      success: function(result) {
-        // Handle or verify the server response if necessary.
-        if (result) {
-            $('#result').html('Logged in using Google credentials! Redirecting. . .')
+      statusCode: {
+        200: function() {
+          $('#result').html('Logged in using Google credentials! Redirecting. . .')
             setTimeout(function() {
-                window.location.href = "/";
+                {#window.location.href = "/";#}
             }, 3000);
-        } 
-      },
-      error: function(result) {
-            $('#result').html('Failed to login.')
-            signout()
+          },
+        401: function() {
+          $('#result').html('Failed to login.');
+            signOut();
+        }
+
       }
     });
-}
+  }
 </script>
 <div id="result"></div>
+</section>
 {% endblock %}
 {% block scripts %}
 {% endblock %}
