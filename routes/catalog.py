@@ -72,8 +72,12 @@ def list_category(category_name,type='html'):
 @Catalog.route('/catalog/<category_name>/<item_name>.<type>')
 def show_item(category_name, item_name, type='html'):
     """Show description of item."""
-    categories = Item.get_categories()
     item = Item.by_name(category_name, item_name)
+    if not item:
+        flash('Could not find item: {}.'.format(item_name))
+        return redirect('/')
+
+    categories = Item.get_categories()
     category_items = Item.by_category(category_name)
     if type.lower() == 'json':
         return jsonify(item=item.serialize)
@@ -85,7 +89,7 @@ def edit_item(category_name, item_name):
     """Edit an item."""
     item = Item.by_name(category_name, item_name)
     if not item:
-        flash('Could not find item.')
+        flash('Could not find item: {}.'.format(item_name))
         return redirect('/')
 
     if not signed_in():
@@ -124,7 +128,7 @@ def delete_item(category_name, item_name):
     """Delete an item."""
     item = Item.by_name(category_name, item_name)
     if not item:
-        flash('Could not find item.')
+        flash('Could not find item: {}.'.format(item_name))
         return redirect('/')
 
     if not signed_in():
