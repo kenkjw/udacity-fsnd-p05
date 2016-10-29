@@ -19,7 +19,7 @@ Users_bp = Blueprint('users', __name__,template_folder='templates')
 
 @Users_bp.route('/login')
 def login():
-    """Log the user out."""
+    """Log the user in."""
     session['csrf'] = token()
     return render_template('login.html')
 
@@ -36,7 +36,8 @@ def verify_token():
         return response
     session['csrf'] = ''
     try:
-        token_info = client.verify_id_token(token, config.oauth['google']['client_id'])
+        token_info = client.verify_id_token(
+            token, config.oauth['google']['client_id'])
         session['provider'] = 'google'
         session['name'] = token_info['name']
         session['email'] = token_info['email']
